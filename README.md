@@ -4,28 +4,15 @@
 [![License: MIT](https://img.shields.io/badge/Browser%20UI-MIT-blue.svg)](LICENSE)
 [![License: CC BY 4.0](https://img.shields.io/badge/Catalog%20Data-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-A fully static web browser for a validated 30,000-year solar and lunar eclipse catalog. **Browse the live catalog at [eclipsedb.org](https://eclipsedb.org/)**, or open `index.html` locally — no installation, no backend, no build step required.
+A fully static, single-file web browser for a validated 30,000-year solar and lunar eclipse catalog.
+
+**Browse the live catalog at [eclipsedb.org](https://eclipsedb.org/)**
 
 ---
 
-## What this repository contains
+## How it works
 
-|File|Description|
-|-|-|
-|`index.html`|The complete browser UI — all filtering, search, and display logic|
-
-The plain-text catalog files, companion paper, and column-schema README are published on Zenodo:
-
-> Kumar, P.V. Anish (2026). *A Validated 30,000-Year Solar Eclipse Catalog: Foundations for Statistical Eclipse Identification in Archaeoastronomy* (Version 1) [Dataset]. Zenodo.
-> **https://doi.org/10.5281/zenodo.19066334**
-
----
-
-## Live browser
-
-**[eclipsedb.org](https://eclipsedb.org/)** — browse all 70,647 solar and 71,914 lunar eclipses directly in the browser. No download required.
-
-The browser loads the full database, which extends the plain-text catalog archived on Zenodo with additional columns including planetary positions, Besselian elements, contact times, and derived metrics. The extended database is not distributed as a file; it is accessible exclusively through the browser interface.
+`index.html` is the entire application — there is no backend. It is a self-contained HTML/JS file that fetches the eclipse database from the same server, decompresses it in the browser using the native `DecompressionStream` API, and loads it into [sql.js](https://github.com/sql-js/sql.js/) (SQLite compiled to WebAssembly). All filtering, searching, and display runs entirely client-side.
 
 ---
 
@@ -48,6 +35,17 @@ Extends the verified eclipse record by **6×** relative to the NASA Five-Millenn
 
 ---
 
+## Data availability
+
+The core plain-text catalog files (`solar_eclipse_final.txt`, `lunar_eclipse_final.txt`), companion methodology paper, and column-schema README are permanently archived and citable on Zenodo:
+
+> Kumar, P.V. Anish (2026). *A Validated 30,000-Year Solar Eclipse Catalog: Foundations for Statistical Eclipse Identification in Archaeoastronomy* (Version 1) [Dataset]. Zenodo.
+> **https://doi.org/10.5281/zenodo.19066334**
+
+The live browser at [eclipsedb.org](https://eclipsedb.org/) provides an enhanced, continually updated view of the same catalog — with additional columns, filters, and display features not present in the archived plain-text files. The extended database is not distributed as a downloadable file; it is accessible only through the browser.
+
+---
+
 ## Browser features
 
 * **70,647 solar + 71,914 lunar eclipses** browsable in a single interface
@@ -55,12 +53,12 @@ Extends the verified eclipse record by **6×** relative to the NASA Five-Millenn
 * Astronomical year notation ↔ BCE/AD toggle (default matches NASA Canon convention)
 * Filter by eclipse type, Saros series, Rasi (Lahiri sidereal / Vedic), proximity to solstice or equinox
 * Sort by date, magnitude, duration, gamma, tropical longitude, or sidereal longitude
-* **Eclipse season pattern** — each event tagged with its adjacent-eclipse context within ±16 days (e.g. L-S-L: a solar flanked by lunars on both sides)
+* **Eclipse season pattern** — each event tagged with its adjacent-eclipse context within ±16 days (L-S-L, S-L, L-S, isolated, etc.)
 * **Multi-ayanamsha display** — sidereal longitudes and Nakshatra shown under Lahiri, Raman, KP, or Fagan-Bradley
 * **Researcher mode** — additional filters for historical and archaeoastronomical work:
   * Filter by Moon's Nakshatra (all 27 lunar mansions)
   * Filter by Indian season / Ritu (Vasanta, Grishma, Varsha, Sharad, Hemanta, Shishira), derived from Sun's tropical longitude — precession-correct for all 30,000 years
-  * Besselian-based **observer location filter**: enter a latitude/longitude and the browser computes visibility (total, partial, or none) at that site for every eclipse in the result set, within a ≤ 2,000-year window
+  * Besselian-based observer location filter: enter a latitude/longitude and the browser computes visibility (total, partial, or none) at that site for every eclipse in the filtered result set, within a ≤ 2,000-year window
   * Totality-only sub-filter within the location filter
 * **Shareable filter links** — copy a permalink that restores your exact filter state
 * **ΔT confidence grading** on every row (see table below)
@@ -79,69 +77,6 @@ Each eclipse carries a confidence tier derived from its ΔT value, following Mor
 |Speculative|> 20 ks|> 10,000 km|Hemisphere only|
 
 > 1 second of ΔT error ≈ 0.46 km of longitude shift at the equator.
-
----
-
-## What is and isn't available for download
-
-**Archived on Zenodo (CC BY 4.0):**
-- `solar_eclipse_final.txt` — 70,647 solar eclipses, plain-text, core columns
-- `lunar_eclipse_final.txt` — 71,914 lunar eclipses, plain-text, core columns
-- Column-schema README and companion paper
-
-**Accessible via [eclipsedb.org](https://eclipsedb.org/) only:**
-- The full extended database, including planetary positions (tropical + sidereal longitude, Nakshatra, Rasi for all seven classical bodies), Besselian elements, contact times, geocentric ephemeris, Indian season (Ritu), eclipse season pattern, and derived quality metrics
-- The extended database is not distributed as a downloadable file
-
----
-
-## Column reference — plain-text catalog (Zenodo)
-
-The plain-text files archived on Zenodo contain the following columns. The full extended schema accessible via the browser is documented in the E101 reference panel at eclipsedb.org.
-
-### Solar eclipses
-
-|Column|ΔT class|Description|
-|-|-|-|
-|`Cat#`|—|Sequential catalog number|
-|`Date`|—|Year Mon DD (astronomical year numbering)|
-|`TD`|—|Time of greatest eclipse (Terrestrial Dynamical Time)|
-|`ΔT(s)`|—|TT − UT in seconds at epoch|
-|`Luna`|ΔT-indep|Lunation number (Brown)|
-|`Sar`|ΔT-indep|Saros series number|
-|`Type`|ΔT-indep|T=Total, A=Annular, H=Hybrid, P±=Partial|
-|`Gamma`|ΔT-indep|Distance of shadow axis from Earth center (Earth radii)|
-|`Mag`|ΔT-indep|Eclipse magnitude (Moon/Sun apparent diameter ratio; >1 = total)|
-|`Lat`|ΔT-sens|Geographic latitude of greatest eclipse|
-|`Lon`|ΔT-sens|Geographic longitude of greatest eclipse|
-|`Alt`|ΔT-sens|Solar altitude at greatest eclipse|
-|`Width`|ΔT-sens|Path width in km (central eclipses only)|
-|`Dur`|ΔT-indep|Duration of totality/annularity at greatest eclipse|
-|`TropLon`|ΔT-indep|Sun tropical longitude at greatest eclipse (degrees)|
-|`SidLon`|ΔT-indep|Sun Lahiri sidereal longitude (degrees)|
-|`Rasi`|ΔT-indep|Vedic rasi (Lahiri ayanamsha)|
-
-### Lunar eclipses
-
-|Column|ΔT class|Description|
-|-|-|-|
-|`Cat#`|—|Sequential catalog number|
-|`Date`|—|Year Mon DD (astronomical year numbering)|
-|`TD`|—|Time of greatest eclipse (TDT)|
-|`ΔT(s)`|—|TT − UT in seconds at epoch|
-|`Luna`|ΔT-indep|Lunation number (Brown)|
-|`Sar`|ΔT-indep|Saros series number|
-|`Typ`|ΔT-indep|Ts=Total, Ps=Partial, Ns=Penumbral, Pn=Partial-North|
-|`Gamma`|ΔT-indep|Distance of shadow axis from Earth center (Earth radii)|
-|`PenMag`|ΔT-indep|Penumbral magnitude|
-|`UmbMag`|ΔT-indep|Umbral magnitude (— for penumbral eclipses)|
-|`Lat`|ΔT-sens|Geographic sublunar point latitude at greatest eclipse|
-|`Lon`|ΔT-sens|Geographic sublunar point longitude at greatest eclipse|
-|`TotDur`|ΔT-indep|Duration of totality (Ts only)|
-|`UmbDur`|ΔT-indep|Duration of umbral eclipse|
-|`TropLon`|ΔT-indep|Moon tropical longitude (degrees)|
-|`SidLon`|ΔT-indep|Moon Lahiri sidereal longitude (degrees)|
-|`Rasi`|ΔT-indep|Vedic rasi (Lahiri ayanamsha)|
 
 ---
 
@@ -189,6 +124,6 @@ If you use this catalog or browser in research, please cite the Zenodo dataset:
 
 **Browser UI** (`index.html`): [MIT License](LICENSE) — © 2026 P.V. Anish Kumar
 
-**Plain-text catalog data** (`solar_eclipse_final.txt`, `lunar_eclipse_final.txt`, and data derived from them): [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
+**Plain-text catalog data** (`solar_eclipse_final.txt`, `lunar_eclipse_final.txt`): [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
 
-The extended database accessible via eclipsedb.org, the catalog generation pipeline, and the methodology implementation are proprietary and not distributed. The companion paper describing the methodology in full is available on Zenodo.
+The extended database accessible via eclipsedb.org, the catalog generation pipeline, and the methodology implementation are proprietary and not distributed.
